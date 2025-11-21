@@ -9,8 +9,8 @@
                 <input type="text" name="codigo" id="codigo" class="form-control" required value="<?= htmlspecialchars($cliente['codigo']) ?>">
             </div>
             <div class="mb-3">
-                <label for="codigo_interno" class="form-label">Código Interno</label>
-                <input type="text" name="codigo_interno" id="codigo_interno" class="form-control" required value="<?= htmlspecialchars($cliente['codigo_interno']) ?>">
+                <label for="codigointerno" class="form-label">Código Interno</label>
+                <input type="text" name="codigointerno" id="codigointerno" class="form-control" required value="<?= htmlspecialchars(isset($cliente['codigointerno']) ? $cliente['codigointerno'] : '') ?>">
             </div>
             <div class="mb-3">
                 <label for="nome" class="form-label">Nome do Cliente</label>

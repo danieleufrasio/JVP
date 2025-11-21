@@ -55,26 +55,48 @@
     width: 100%;
     z-index: 1050;
 }
-.sidebar {
-    position: fixed;
-    top: 80px; /* ou o valor que você preferir */
-    left: 0;
-    width: 250px;
-    height: calc(100vh - 80px);
-    background: #f8f9fa;
-    border-right: 1px solid #dee2e6;
-    z-index: 1030;
-    margin-top: 80px;
+            .sidebar {
+                position: fixed;
+                top: 80px; /* altura do header */
+                left: 0;
+                width: 250px;
+                height: calc(100vh - 80px);
+                background: #f8f9fa;
+                border-right: 1px solid #dee2e6;
+                z-index: 1030;
+                overflow-y: auto;
+                transition: left 0.3s;
+                padding-top: 80px; /* espaço para o perfil */
 }
 
-
-.main-content {
-    margin-left: 250px;
-    padding: 24px 32px 0 32px;
-    padding-top: 96px; /* altura do header + espaçamento extra */
-    min-height: 100vh;
-    background: #fff;
-}
+        .main-content {
+            margin-left: 250px;
+            padding: 24px 32px 0 32px;
+            padding-top: 200px; /* altura do header + espaçamento extra */
+            min-height: 100vh;
+            background: #fff;
+        }
+        @media (max-width: 991.98px) {
+            .sidebar {
+                left: -250px;
+            }
+            .sidebar.active {
+                left: 0;
+            }
+            .main-content {
+                margin-left: 0 !important;
+            }
+            #sidebarToggle {
+                display: block !important;
+            }
+        }
+        #sidebarToggle {
+            display: none;
+            position: fixed;
+            top: 90px;
+            left: 10px;
+            z-index: 2001;
+        }
 
     </style>
 </head>
@@ -97,58 +119,57 @@
                         <li class="nav-item"><a class="nav-link" href="<?= BASE_URL ?>relatorios">Relatórios</a></li>
                     </ul>
                     <div class="d-flex align-items-center">
-                        <?php if (!empty($_SESSION['colaborador'])): 
-                            $colab = $_SESSION['colaborador'];
-                        ?>
-                        <div class="dropdown">
-                            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
-                                <?php if (!empty($colab['foto'])): ?>
-                                    <img src="<?= htmlspecialchars($colab['foto']) ?>" alt="Profile" class="profile-img me-2">
-                                <?php else: ?>
-                                    <span class="avatar-circle me-2">
-                                        <?= strtoupper(substr($colab['nome'], 0, 1)) ?>
-                                    </span>
-                                <?php endif; ?>
-                                <span class="d-none d-sm-inline"><?= htmlspecialchars($colab['nome']) ?></span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownUser">
-                                <li class="dropdown-header px-3 py-2">
-                                    <h6 class="mb-0"><?= htmlspecialchars($colab['nome']) ?></h6>
-                                    <small class="text-muted"><?= htmlspecialchars($colab['email']) ?></small>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item" href="<?= BASE_URL ?>profile">
-                                        <i class="fas fa-user me-2"></i> Meu Perfil
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="<?= BASE_URL ?>configuracoes">
-                                        <i class="fas fa-cog me-2"></i> Configurações
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="<?= BASE_URL ?>notificacoes">
-                                        <i class="fas fa-bell me-2"></i> Notificações
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="<?= BASE_URL ?>ajuda">
-                                        <i class="fas fa-question-circle me-2"></i> Ajuda
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="<?= BASE_URL ?>logout">
-                                        <i class="fas fa-sign-out-alt me-2"></i> Sair
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                        <?php else: ?>
-                            <a href="<?= BASE_URL ?>login" class="btn btn-outline-primary btn-sm">Entrar</a>
-                        <?php endif; ?>
-                    </div>
+    <?php if (!empty($_SESSION['colaborador'])): 
+        $colab = $_SESSION['colaborador'];
+    ?>
+    <div class="dropdown">
+        <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+            <?php if (!empty($colab['foto'])): ?>
+                <img src="<?= htmlspecialchars($colab['foto']) ?>" alt="Profile" class="profile-img me-2">
+            <?php else: ?>
+                <span class="avatar-circle me-2">
+                    <?= strtoupper(mb_substr($colab['nome'], 0, 1, 'UTF-8')) ?>
+                </span>
+            <?php endif; ?>
+            <span class="d-none d-sm-inline"><?= htmlspecialchars($colab['nome']) ?></span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownUser">
+            <li class="dropdown-header px-3 py-2">
+                <h6 class="mb-0"><?= htmlspecialchars($colab['nome']) ?></h6>
+                <small class="text-muted"><?= htmlspecialchars($colab['email']) ?></small>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <a class="dropdown-item" href="<?= BASE_URL ?>profile">
+                    <i class="fas fa-user me-2"></i> Meu Perfil
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="<?= BASE_URL ?>configuracoes">
+                    <i class="fas fa-cog me-2"></i> Configurações
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="<?= BASE_URL ?>notificacoes">
+                    <i class="fas fa-bell me-2"></i> Notificações
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="<?= BASE_URL ?>ajuda">
+                    <i class="fas fa-question-circle me-2"></i> Ajuda
+                </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <a class="dropdown-item text-danger" href="<?= BASE_URL ?>auth/logout">
+                    <i class="fas fa-sign-out-alt me-2"></i> Sair
+                </a>
+            </li>
+        </ul>
+    </div>
+    <?php endif; ?>
+</div>
+
                 </div>
             </div>
         </nav>

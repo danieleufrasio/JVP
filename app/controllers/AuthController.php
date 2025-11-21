@@ -1,15 +1,36 @@
 <?php
+// Controle de sessão seguro
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 require_once __DIR__ . '/../models/Colaborador.php';
 
-class AuthController {
-    public function login() {
-        // Redireciona se já estiver logado
-        if (isset($_SESSION['colaborador']) && !empty($_SESSION['colaborador']['id'])) {
-            header('Location: ' . BASE_URL . 'dashboard');
+class AuthController
+{
+    public function login()
+    {
+        $permissoesDashboard = [
+            'projetista',
+            'calculista',
+            'verificador',
+            'administrador',
+            'freelancer'
+        ];
+
+        if (isset($_SESSION['colaborador'])) {
+            if (in_array($_SESSION['colaborador']['nivel_acesso'], $permissoesDashboard)) {
+                header('Location: ' . BASE_URL . 'dashboard');
+            } else {
+                header('Location: ' . BASE_URL . 'home');
+            }
             exit;
         }
-        
+
+        if (isset($_SESSION['visitante'])) {
+            header('Location: ' . BASE_URL . 'home');
+            exit;
+        }
 
         $error = null;
 
@@ -18,20 +39,25 @@ class AuthController {
             $senha = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_SPECIAL_CHARS);
 
             if ($email && $senha) {
-                // Chama o método de autenticação do Model
                 $colaborador = Colaborador::autenticarPorEmail($email, $senha);
 
                 if ($colaborador) {
                     session_regenerate_id(true);
                     $_SESSION['colaborador'] = [
-                        'id'           => $colaborador['id'],
-                        'nome'         => $colaborador['nome'],
-                        'email'        => $colaborador['email'],
+                        'id' => $colaborador['id'],
+                        'nome' => $colaborador['nome'],
+                        'email' => $colaborador['email'],
                         'nivel_acesso' => $colaborador['nivel_acesso'],
-                        'status'       => $colaborador['status']
+                        'status' => $colaborador['status'],
                     ];
-                    // Redireciona para o dashboard
-                    header('Location: ' . BASE_URL . 'dashboard');
+                    $_SESSION['user_role'] = $colaborador['nivel_acesso'];
+                    $_SESSION['user_email'] = $colaborador['email'];
+
+                    if (in_array($colaborador['nivel_acesso'], $permissoesDashboard)) {
+                        header('Location: ' . BASE_URL . 'dashboard');
+                    } else {
+                        header('Location: ' . BASE_URL . 'home');
+                    }
                     exit;
                 } else {
                     $error = "Credenciais inválidas";
@@ -44,27 +70,42 @@ class AuthController {
         require_once __DIR__ . '/../views/auth/login.php';
     }
 
-    public function logout() {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
+    // Método extra para login via Google OAuth, para chamar no callback
+    public function loginGoogle($userInfo, $pdo)
+    {
+        // Tenta buscar colaborador no banco via email
+        $colaborador = Colaborador::buscarPorEmail($userInfo->email, $pdo);
+
+        if ($colaborador) {
+            // Se for colaborador, cria sessão colaborador
+            session_regenerate_id(true);
+            $_SESSION['colaborador'] = [
+                'id' => $colaborador['id'],
+                'nome' => $colaborador['nome'],
+                'email' => $colaborador['email'],
+                'nivel_acesso' => $colaborador['nivel_acesso'],
+                'status' => $colaborador['status'],
+                'photo' => $userInfo->picture,
+            ];
+            header('Location: ' . BASE_URL . 'dashboard');
+            exit();
+        } else {
+            // Caso contrário, cria sessão visitante
+            $_SESSION['visitante'] = [
+                'nome' => $userInfo->name,
+                'email' => $userInfo->email,
+                'photo' => $userInfo->picture,
+            ];
+            header('Location: ' . BASE_URL . 'home');
+            exit();
         }
-        $_SESSION = [];
+    }
+
+    public function logout()
+    {
         session_unset();
         session_destroy();
-
-        if (ini_get("session.use_cookies")) {
-            $params = session_get_cookie_params();
-            setcookie(
-                session_name(),
-                '',
-                time() - 42000,
-                $params["path"],
-                $params["domain"],
-                $params["secure"],
-                $params["httponly"]
-            );
-        }
-        header('Location: ' . BASE_URL . 'login');
+        header('Location: ' . BASE_URL . 'home');
         exit;
     }
 }

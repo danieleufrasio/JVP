@@ -2,7 +2,7 @@
 class Pavimento {
     public static function all() {
         $pdo = require __DIR__ . '/../config/db.php';
-        $stmt = $pdo->query("SELECT * FROM pavimentos ORDER BY pavimento");
+        $stmt = $pdo->query("SELECT * FROM pavimentos ORDER BY id");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -15,19 +15,21 @@ class Pavimento {
 
     public static function create($dados) {
         $pdo = require __DIR__ . '/../config/db.php';
-        $stmt = $pdo->prepare("INSERT INTO pavimentos (sigla, pavimento) VALUES (?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO pavimentos (obraid, sigla, descricao) VALUES (?, ?, ?)");
         return $stmt->execute([
+            $dados['obraid'],
             $dados['sigla'],
-            $dados['pavimento']
+            $dados['descricao']
         ]);
     }
 
     public static function update($id, $dados) {
         $pdo = require __DIR__ . '/../config/db.php';
-        $stmt = $pdo->prepare("UPDATE pavimentos SET sigla=?, pavimento=? WHERE id=?");
+        $stmt = $pdo->prepare("UPDATE pavimentos SET obraid=?, sigla=?, descricao=? WHERE id=?");
         return $stmt->execute([
+            $dados['obraid'],
             $dados['sigla'],
-            $dados['pavimento'],
+            $dados['descricao'],
             $id
         ]);
     }
@@ -36,13 +38,5 @@ class Pavimento {
         $pdo = require __DIR__ . '/../config/db.php';
         $stmt = $pdo->prepare("DELETE FROM pavimentos WHERE id=?");
         return $stmt->execute([$id]);
-    }
-
-    public static function search($termo) {
-        $pdo = require __DIR__ . '/../config/db.php';
-        $stmt = $pdo->prepare("SELECT * FROM pavimentos WHERE sigla LIKE ? OR pavimento LIKE ?");
-        $like = "%$termo%";
-        $stmt->execute([$like, $like]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

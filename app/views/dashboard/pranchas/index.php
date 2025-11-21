@@ -1,65 +1,138 @@
-<?php include_once __DIR__ . '/../../layouts/header.php'; ?>
-<main class="main-content">
-    <div class="main-inner" style="max-width:1400px;margin:0 auto;">
-        <h2 class="mb-3 mt-0 text-center">Pranchas</h2>
-        <div class="mb-3 d-flex justify-content-between align-items-center gap-2 flex-wrap">
-            <a href="<?= BASE_URL ?>pranchas/novo" class="btn btn-primary">Novo</a>
-            <form class="d-flex" method="get" action="<?= BASE_URL ?>pranchas/pesquisar">
-                <input type="text" name="q" placeholder="Pesquisar..." class="form-control me-2" style="width:200px;">
-                <button class="btn btn-outline-secondary" type="submit">Pesquisar</button>
-            </form>
-            <a href="<?= BASE_URL ?>dashboard" class="btn btn-secondary">Fechar</a>
-        </div>
-        <div class="table-responsive">
-            <table class="table table-striped align-middle">
-                <thead>
-                    <tr>
-                        <th>Cliente</th>
-                        <th>Obra</th>
-                        <th>Previsão</th>
-                        <th>Conclusão</th>
-                        <th>Tipo Projeto</th>
-                        <th>Nº Prancha</th>
-                        <th>Elemento</th>
-                        <th>Pavimento</th>
-                        <th>Revisão</th>
-                        <th>Tipo Papel</th>
-                        <th>Status</th>
-                        <th>Projetado</th>
-                        <th>Verificado</th>
-                        <th>Calculado</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                <?php foreach ($pranchas as $prancha): ?>
-                    <tr>
-                        <td><?= htmlspecialchars($prancha['cliente_nome']) ?></td>
-                        <td><?= htmlspecialchars($prancha['obra_nome']) ?></td>
-                        <td><?= htmlspecialchars($prancha['previsao_conclusao']) ?></td>
-                        <td><?= htmlspecialchars($prancha['conclusao']) ?></td>
-                        <td><?= htmlspecialchars($prancha['tipo_projeto_sigla']) ?></td>
-                        <td><?= htmlspecialchars($prancha['numero_prancha']) ?></td>
-                        <td><?= htmlspecialchars($prancha['elemento_sigla']) ?></td>
-                        <td><?= htmlspecialchars($prancha['pavimento_sigla']) ?></td>
-                        <td><?= htmlspecialchars($prancha['revisao']) ?></td>
-                        <td><?= htmlspecialchars($prancha['tipo_papel_nome']) ?></td>
-                        <td><?= htmlspecialchars($prancha['status']) ?></td>
-                        <td><?= htmlspecialchars($prancha['projetado_nome']) ?></td>
-                        <td><?= htmlspecialchars($prancha['verificado_nome']) ?></td>
-                        <td><?= htmlspecialchars($prancha['calculado_nome']) ?></td>
-                        <td>
-                            <a href="<?= BASE_URL ?>pranchas/editar/<?= $prancha['id'] ?>" class="btn btn-sm btn-warning">Alterar</a>
-                            <a href="<?= BASE_URL ?>pranchas/excluir/<?= $prancha['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Excluir esta prancha?')">Excluir</a>
-                            <a href="<?= BASE_URL ?>pranchas/replicar/<?= $prancha['id'] ?>" class="btn btn-sm btn-info">Replicar</a>
-                            <a href="<?= BASE_URL ?>pranchas/imagem/<?= $prancha['id'] ?>" class="btn btn-sm btn-secondary">Imagem</a>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</main>
+<?php
+require_once __DIR__ . '/../models/Prancha.php';
+require_once __DIR__ . '/../models/Cliente.php';
+require_once __DIR__ . '/../models/Obra.php';
+require_once __DIR__ . '/../models/TipoProjeto.php';
+require_once __DIR__ . '/../models/Elemento.php';
+require_once __DIR__ . '/../models/Pavimento.php';
+require_once __DIR__ . '/../models/TipoPapel.php';
+require_once __DIR__ . '/../models/Colaborador.php';
 
-<?php include_once __DIR__ . '/../../layouts/footer.php'; ?>
+class PranchasController
+{
+    public function index()
+    {
+        $pranchas = Prancha::all();
+        require __DIR__ . '/../views/dashboard/pranchas/index.php';
+    }
+
+    public function novo()
+    {
+        $clientes = Cliente::all();
+        $obras = Obra::all();
+        $tiposProjeto = TipoProjeto::all();
+        $elementos = Elemento::all();
+        $pavimentos = Pavimento::all();
+        $tiposPapel = TipoPapel::all();
+        $colaboradores = Colaborador::all();
+
+        require __DIR__ . '/../views/dashboard/pranchas/novo.php';
+    }
+
+    public function editar($id)
+    {
+        $prancha = Prancha::find($id);
+        $clientes = Cliente::all();
+        $obras = Obra::all();
+        $tiposProjeto = TipoProjeto::all();
+        $elementos = Elemento::all();
+        $pavimentos = Pavimento::all();
+        $tiposPapel = TipoPapel::all();
+        $colaboradores = Colaborador::all();
+
+        require __DIR__ . '/../views/dashboard/pranchas/editar.php';
+    }
+
+    public function salvar()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $dados = $_POST;
+            $sucesso = Prancha::create($dados);
+
+            if ($sucesso) {
+                $_SESSION['success'] = "Prancha criada com sucesso!";
+            } else {
+                $_SESSION['error'] = "Erro ao salvar prancha.";
+            }
+            header('Location: ' . BASE_URL . 'pranchas');
+            exit;
+        }
+    }
+
+    public function atualizar($id = null)
+    {
+        if (!$id && isset($_POST['id'])) {
+            $id = $_POST['id'];
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $id) {
+            $dados = $_POST;
+            $sucesso = Prancha::update($id, $dados);
+
+            if ($sucesso) {
+                $_SESSION['success'] = "Prancha atualizada com sucesso!";
+            } else {
+                $_SESSION['error'] = "Erro ao atualizar prancha.";
+            }
+            header('Location: ' . BASE_URL . 'pranchas');
+            exit;
+        } else {
+            $_SESSION['error'] = "ID inválido ou método inválido.";
+            header('Location: ' . BASE_URL . 'pranchas');
+            exit;
+        }
+    }
+
+    public function excluir($id = null)
+    {
+        if (!$id && isset($_GET['id'])) {
+            $id = $_GET['id'];
+        }
+        if (!$id && isset($_POST['id'])) {
+            $id = $_POST['id'];
+        }
+        if ($id) {
+            $sucesso = Prancha::delete($id);
+            if ($sucesso) {
+                $_SESSION['success'] = "Prancha excluída com sucesso.";
+            } else {
+                $_SESSION['error'] = "Erro ao excluir prancha.";
+            }
+        } else {
+            $_SESSION['error'] = "ID inválido para exclusão.";
+        }
+        header('Location: ' . BASE_URL . 'pranchas');
+        exit;
+    }
+
+    public function alterarStatus($id)
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $novoStatus = $_POST['status'] ?? 'pendente';
+            $sucesso = Prancha::updateStatus($id, $novoStatus);
+
+            if ($sucesso) {
+                $_SESSION['success'] = "Status da prancha alterado com sucesso.";
+            } else {
+                $_SESSION['error'] = "Erro ao alterar status da prancha.";
+            }
+            header('Location: ' . BASE_URL . 'pranchas');
+            exit;
+        } else {
+            $_SESSION['error'] = "Método inválido.";
+            header('Location: ' . BASE_URL . 'pranchas');
+            exit;
+        }
+    }
+
+    public function pesquisar()
+    {
+        // Pode adaptar para GET ou POST conforme seu form (GET = action do exemplo do index.php).
+        $termo = $_GET['q'] ?? ($_POST['termo'] ?? '');
+        if ($termo !== '') {
+            $pranchas = Prancha::search($termo);
+            require __DIR__ . '/../views/dashboard/pranchas/index.php';
+        } else {
+            $this->index();
+        }
+    }
+}

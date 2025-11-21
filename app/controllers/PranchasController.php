@@ -8,13 +8,16 @@ require_once __DIR__ . '/../models/Pavimento.php';
 require_once __DIR__ . '/../models/TipoPapel.php';
 require_once __DIR__ . '/../models/Colaborador.php';
 
-class PranchasController {
-    public function index() {
+class PranchasController
+{
+    public function index()
+    {
         $pranchas = Prancha::all();
         require __DIR__ . '/../views/dashboard/pranchas/index.php';
     }
 
-    public function novo() {
+    public function novo()
+    {
         $clientes = Cliente::all();
         $obras = Obra::all();
         $tiposProjeto = TipoProjeto::all();
@@ -22,35 +25,12 @@ class PranchasController {
         $pavimentos = Pavimento::all();
         $tiposPapel = TipoPapel::all();
         $colaboradores = Colaborador::all();
+
         require __DIR__ . '/../views/dashboard/pranchas/novo.php';
     }
 
-    public function salvar() {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $dados = [
-                'cliente_id' => $_POST['cliente_id'],
-                'obra_id' => $_POST['obra_id'],
-                'previsao_conclusao' => $_POST['previsao_conclusao'],
-                'conclusao' => $_POST['conclusao'],
-                'tipo_projeto_id' => $_POST['tipo_projeto_id'],
-                'numero_prancha' => $_POST['numero_prancha'],
-                'elemento_id' => $_POST['elemento_id'],
-                'pavimento_id' => $_POST['pavimento_id'],
-                'revisao' => $_POST['revisao'],
-                'tipo_papel_id' => $_POST['tipo_papel_id'],
-                'observacao' => $_POST['observacao'],
-                'status' => $_POST['status'],
-                'projetado_id' => $_POST['projetado_id'],
-                'verificado_id' => $_POST['verificado_id'],
-                'calculado_id' => $_POST['calculado_id'],
-            ];
-            Prancha::create($dados);
-            header('Location: ' . BASE_URL . 'pranchas');
-            exit;
-        }
-    }
-
-    public function editar($id) {
+    public function editar($id)
+    {
         $prancha = Prancha::find($id);
         $clientes = Cliente::all();
         $obras = Obra::all();
@@ -59,45 +39,73 @@ class PranchasController {
         $pavimentos = Pavimento::all();
         $tiposPapel = TipoPapel::all();
         $colaboradores = Colaborador::all();
-        require __DIR__ . '/../views/pranchas/dashboard/editar.php';
+
+        require __DIR__ . '/../views/dashboard/pranchas/editar.php';
     }
 
-    public function atualizar($id) {
+    public function salvar()
+    {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $dados = [
-                'cliente_id' => $_POST['cliente_id'],
-                'obra_id' => $_POST['obra_id'],
-                'previsao_conclusao' => $_POST['previsao_conclusao'],
-                'conclusao' => $_POST['conclusao'],
-                'tipo_projeto_id' => $_POST['tipo_projeto_id'],
-                'numero_prancha' => $_POST['numero_prancha'],
-                'elemento_id' => $_POST['elemento_id'],
-                'pavimento_id' => $_POST['pavimento_id'],
-                'revisao' => $_POST['revisao'],
-                'tipo_papel_id' => $_POST['tipo_papel_id'],
-                'observacao' => $_POST['observacao'],
-                'status' => $_POST['status'],
-                'projetado_id' => $_POST['projetado_id'],
-                'verificado_id' => $_POST['verificado_id'],
-                'calculado_id' => $_POST['calculado_id'],
-            ];
-            Prancha::update($id, $dados);
+            $dados = $_POST;
+            $sucesso = Prancha::create($dados);
+
+            $_SESSION[$sucesso ? 'success' : 'error'] = $sucesso ?
+                "Prancha criada com sucesso!" :
+                "Erro ao salvar prancha.";
             header('Location: ' . BASE_URL . 'pranchas');
             exit;
         }
     }
 
-    public function excluir($id) {
-        Prancha::delete($id);
+    public function atualizar($id = null)
+    {
+        if (!$id && isset($_POST['id'])) {
+            $id = $_POST['id'];
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $id) {
+            $dados = $_POST;
+            $sucesso = Prancha::update($id, $dados);
+
+            $_SESSION[$sucesso ? 'success' : 'error'] = $sucesso ?
+                "Prancha atualizada com sucesso!" :
+                "Erro ao atualizar prancha.";
+            header('Location: ' . BASE_URL . 'pranchas');
+            exit;
+        } else {
+            $_SESSION['error'] = "ID inválido ou método inválido.";
+            header('Location: ' . BASE_URL . 'pranchas');
+            exit;
+        }
+    }
+
+    public function excluir($id = null)
+    {
+        if (!$id && isset($_GET['id'])) {
+            $id = $_GET['id'];
+        }
+        if (!$id && isset($_POST['id'])) {
+            $id = $_POST['id'];
+        }
+        if ($id) {
+            $sucesso = Prancha::delete($id);
+            $_SESSION[$sucesso ? 'success' : 'error'] = $sucesso ?
+                "Prancha excluída com sucesso." :
+                "Erro ao excluir prancha.";
+        } else {
+            $_SESSION['error'] = "ID inválido para exclusão.";
+        }
         header('Location: ' . BASE_URL . 'pranchas');
         exit;
     }
 
-    public function pesquisar() {
-        $termo = filter_input(INPUT_GET, 'q', FILTER_SANITIZE_SPECIAL_CHARS);
-        $pranchas = $termo ? Prancha::search($termo) : Prancha::all();
-        require __DIR__ . '/../views/dashboard/pranchas/index.php';
+    public function pesquisar()
+    {
+        $termo = $_GET['q'] ?? ($_POST['termo'] ?? '');
+        if ($termo !== '') {
+            $pranchas = Prancha::search($termo);
+            require __DIR__ . '/../views/dashboard/pranchas/index.php';
+        } else {
+            $this->index();
+        }
     }
-
-    // Extra: replicar, imagem, escolha podem ser implementados como métodos adicionais
 }

@@ -18,8 +18,7 @@
                         <th>Código</th>
                         <th>Fornecedor</th>
                         <th>Status</th>
-                        <th>E-mail</th>
-                        <th>Categoria</th>
+                        <th>Descrição</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -29,8 +28,7 @@
                         <td><?= htmlspecialchars($fornecedor['codigo']) ?></td>
                         <td><?= htmlspecialchars($fornecedor['fornecedor']) ?></td>
                         <td><?= htmlspecialchars($fornecedor['status']) ?></td>
-                        <td><?= htmlspecialchars($fornecedor['email']) ?></td>
-                        <td><?= htmlspecialchars($fornecedor['categoria']) ?></td>
+                        <td><?= htmlspecialchars($fornecedor['descricao']) ?></td>
                         <td>
                             <a href="<?= BASE_URL ?>fornecedores/editar/<?= $fornecedor['id'] ?>" class="btn btn-sm btn-warning">Alterar</a>
                             <a href="<?= BASE_URL ?>fornecedores/excluir/<?= $fornecedor['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Excluir este fornecedor?')">Excluir</a>

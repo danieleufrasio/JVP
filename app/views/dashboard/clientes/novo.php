@@ -10,7 +10,7 @@
             </div>
             <div class="mb-3">
                 <label for="codigo_interno" class="form-label">Código Interno</label>
-                <input type="text" name="codigo_interno" id="codigo_interno" class="form-control" required>
+                <input type="text" name="codigointerno" id="codigo_interno" class="form-control" required>
             </div>
             <div class="mb-3">
                 <label for="nome" class="form-label">Nome do Cliente</label>

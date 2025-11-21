@@ -1,84 +1,59 @@
 <?php
 require_once __DIR__ . '/../models/TipoProjeto.php';
 
-class TiposProjetoController {
-    public function index() {
+class TiposProjetoController
+{
+    public function index()
+    {
         $tipos = TipoProjeto::all();
-        require_once __DIR__ . '/../views/dashboard/tipos_projeto/index.php';
+        require __DIR__ . '/../views/dashboard/tipos_projeto/index.php';
     }
 
-    public function novo() {
-        require_once __DIR__ . '/../views/dashboard/tipos_projeto/novo.php';
+    public function novo()
+    {
+        require __DIR__ . '/../views/dashboard/tipos_projeto/novo.php';
     }
 
-    public function salvar() {
-        try {
-            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                $dados = [
-                    'sigla' => htmlspecialchars($_POST['sigla']),
-                    'descricao' => htmlspecialchars($_POST['descricao'])
-                ];
-                if (TipoProjeto::create($dados)) {
-                    $_SESSION['success'] = "Tipo de projeto cadastrado com sucesso!";
-                    header('Location: ' . BASE_URL . 'tiposProjeto');
-                    exit;
-                } else {
-                    $_SESSION['error'] = "Erro ao cadastrar tipo de projeto!";
-                }
-            }
-            require_once __DIR__ . '/../views/dashboard/tipos_projeto/novo.php';
-        } catch (Exception $e) {
-            $_SESSION['error'] = $e->getMessage();
-            require_once __DIR__ . '/../views/dashboard/tipos_projeto/novo.php';
-        }
+    public function salvar()
+    {
+        $dados = [
+            'sigla' => $_POST['sigla'],
+            'descricao' => $_POST['descricao']
+        ];
+        TipoProjeto::create($dados);
+        header('Location: /tiposProjeto');
+        exit;
     }
 
-    public function editar($id) {
+    public function editar($id)
+    {
         $tipo = TipoProjeto::find($id);
-        require_once __DIR__ . '/../views/dashboard/tipos_projeto/editar.php';
+        require __DIR__ . '/../views/dashboard/tipos_projeto/editar.php';
     }
 
-    public function atualizar($id) {
-        try {
-            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                $dados = [
-                    'sigla' => htmlspecialchars($_POST['sigla']),
-                    'descricao' => htmlspecialchars($_POST['descricao'])
-                ];
-                if (TipoProjeto::update($id, $dados)) {
-                    $_SESSION['success'] = "Tipo de projeto atualizado com sucesso!";
-                    header('Location: ' . BASE_URL . 'tiposProjeto');
-                    exit;
-                } else {
-                    $_SESSION['error'] = "Erro ao atualizar tipo de projeto!";
-                }
-            }
-            $tipo = TipoProjeto::find($id);
-            require_once __DIR__ . '/../views/dashboard/tipos_projeto/editar.php';
-        } catch (Exception $e) {
-            $_SESSION['error'] = $e->getMessage();
-            $tipo = TipoProjeto::find($id);
-            require_once __DIR__ . '/../views/dashboard/tipos_projeto/editar.php';
-        }
-    }
-
-    public function excluir($id) {
-        if (TipoProjeto::delete($id)) {
-            $_SESSION['success'] = "Tipo de projeto excluído com sucesso!";
-        } else {
-            $_SESSION['error'] = "Erro ao excluir tipo de projeto!";
-        }
-        header('Location: ' . BASE_URL . 'tiposProjeto');
+    public function atualizar($id)
+    {
+        $dados = [
+            'sigla' => $_POST['sigla'],
+            'descricao' => $_POST['descricao']
+        ];
+        TipoProjeto::update($id, $dados);
+        header('Location: /tiposProjeto');
         exit;
     }
 
-    public function pesquisarAjax() {
-        header('Content-Type: application/json; charset=utf-8');
-        $termo = filter_input(INPUT_GET, 'q', FILTER_SANITIZE_SPECIAL_CHARS);
-        $tipos = ($termo === null || $termo === '')
-            ? TipoProjeto::all()
-            : TipoProjeto::search($termo);
-        echo json_encode($tipos);
+    public function excluir($id)
+    {
+        TipoProjeto::delete($id);
+        header('Location: /tiposProjeto');
         exit;
+    }
+
+    public function pesquisar()
+    {
+        $termo = $_GET['termo'];
+        $tipos = TipoProjeto::search($termo);
+        require __DIR__ . '/../views/dashboard/tipos_projeto/index.php';
     }
 }
+?>
