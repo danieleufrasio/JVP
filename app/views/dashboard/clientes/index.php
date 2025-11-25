@@ -24,7 +24,7 @@
                     <tr>
                         <td><?= htmlspecialchars($cliente['id']) ?></td>
                         <td><?= htmlspecialchars($cliente['codigo']) ?></td>
-                        <td><?= htmlspecialchars($cliente['codigointerno']) ?></td>
+                        <td><?= htmlspecialchars($cliente['codigo_interno'] ?? '') ?></td>
                         <td><?= htmlspecialchars($cliente['nome']) ?></td>
                         <td><?= htmlspecialchars($cliente['status']) ?></td>
                         <td>

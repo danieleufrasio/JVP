@@ -1,138 +1,74 @@
-<?php
-require_once __DIR__ . '/../models/Prancha.php';
-require_once __DIR__ . '/../models/Cliente.php';
-require_once __DIR__ . '/../models/Obra.php';
-require_once __DIR__ . '/../models/TipoProjeto.php';
-require_once __DIR__ . '/../models/Elemento.php';
-require_once __DIR__ . '/../models/Pavimento.php';
-require_once __DIR__ . '/../models/TipoPapel.php';
-require_once __DIR__ . '/../models/Colaborador.php';
+<?php include_once __DIR__ . '/../../layouts/header.php'; ?>
+<main class="main-content">
+    <div class="main-inner" style="max-width:1050px;margin:0 auto;">
+        <h2 class="mb-3 mt-0 text-center">Lista de Pranchas</h2>
 
-class PranchasController
-{
-    public function index()
-    {
-        $pranchas = Prancha::all();
-        require __DIR__ . '/../views/dashboard/pranchas/index.php';
-    }
+        <?php if (!empty($_SESSION['success'])): ?>
+            <div class="alert alert-success"><?= htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?></div>
+        <?php endif; ?>
+        <?php if (!empty($_SESSION['error'])): ?>
+            <div class="alert alert-danger"><?= htmlspecialchars($_SESSION['error']); unset($_SESSION['error']); ?></div>
+        <?php endif; ?>
 
-    public function novo()
-    {
-        $clientes = Cliente::all();
-        $obras = Obra::all();
-        $tiposProjeto = TipoProjeto::all();
-        $elementos = Elemento::all();
-        $pavimentos = Pavimento::all();
-        $tiposPapel = TipoPapel::all();
-        $colaboradores = Colaborador::all();
+        <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap">
+            <form class="d-flex gap-2" action="<?= BASE_URL ?>pranchas/pesquisar" method="get">
+                <input type="text" name="q" class="form-control" style="max-width:220px" placeholder="Filtrar por código, nome ou obra...">
+                <button class="btn btn-outline-primary">Pesquisar</button>
+            </form>
+            <a href="<?= BASE_URL ?>pranchas/novo" class="btn btn-success">Nova Prancha</a>
+        </div>
 
-        require __DIR__ . '/../views/dashboard/pranchas/novo.php';
-    }
-
-    public function editar($id)
-    {
-        $prancha = Prancha::find($id);
-        $clientes = Cliente::all();
-        $obras = Obra::all();
-        $tiposProjeto = TipoProjeto::all();
-        $elementos = Elemento::all();
-        $pavimentos = Pavimento::all();
-        $tiposPapel = TipoPapel::all();
-        $colaboradores = Colaborador::all();
-
-        require __DIR__ . '/../views/dashboard/pranchas/editar.php';
-    }
-
-    public function salvar()
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $dados = $_POST;
-            $sucesso = Prancha::create($dados);
-
-            if ($sucesso) {
-                $_SESSION['success'] = "Prancha criada com sucesso!";
-            } else {
-                $_SESSION['error'] = "Erro ao salvar prancha.";
-            }
-            header('Location: ' . BASE_URL . 'pranchas');
-            exit;
-        }
-    }
-
-    public function atualizar($id = null)
-    {
-        if (!$id && isset($_POST['id'])) {
-            $id = $_POST['id'];
-        }
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $id) {
-            $dados = $_POST;
-            $sucesso = Prancha::update($id, $dados);
-
-            if ($sucesso) {
-                $_SESSION['success'] = "Prancha atualizada com sucesso!";
-            } else {
-                $_SESSION['error'] = "Erro ao atualizar prancha.";
-            }
-            header('Location: ' . BASE_URL . 'pranchas');
-            exit;
-        } else {
-            $_SESSION['error'] = "ID inválido ou método inválido.";
-            header('Location: ' . BASE_URL . 'pranchas');
-            exit;
-        }
-    }
-
-    public function excluir($id = null)
-    {
-        if (!$id && isset($_GET['id'])) {
-            $id = $_GET['id'];
-        }
-        if (!$id && isset($_POST['id'])) {
-            $id = $_POST['id'];
-        }
-        if ($id) {
-            $sucesso = Prancha::delete($id);
-            if ($sucesso) {
-                $_SESSION['success'] = "Prancha excluída com sucesso.";
-            } else {
-                $_SESSION['error'] = "Erro ao excluir prancha.";
-            }
-        } else {
-            $_SESSION['error'] = "ID inválido para exclusão.";
-        }
-        header('Location: ' . BASE_URL . 'pranchas');
-        exit;
-    }
-
-    public function alterarStatus($id)
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $novoStatus = $_POST['status'] ?? 'pendente';
-            $sucesso = Prancha::updateStatus($id, $novoStatus);
-
-            if ($sucesso) {
-                $_SESSION['success'] = "Status da prancha alterado com sucesso.";
-            } else {
-                $_SESSION['error'] = "Erro ao alterar status da prancha.";
-            }
-            header('Location: ' . BASE_URL . 'pranchas');
-            exit;
-        } else {
-            $_SESSION['error'] = "Método inválido.";
-            header('Location: ' . BASE_URL . 'pranchas');
-            exit;
-        }
-    }
-
-    public function pesquisar()
-    {
-        // Pode adaptar para GET ou POST conforme seu form (GET = action do exemplo do index.php).
-        $termo = $_GET['q'] ?? ($_POST['termo'] ?? '');
-        if ($termo !== '') {
-            $pranchas = Prancha::search($termo);
-            require __DIR__ . '/../views/dashboard/pranchas/index.php';
-        } else {
-            $this->index();
-        }
-    }
-}
+        <div class="table-responsive rounded shadow-sm">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-dark text-center">
+                    <tr>
+                        <th>ID</th>
+                        <th>Código</th>
+                        <th>Cliente</th>
+                        <th>Obra</th>
+                        <th>Tipo Projeto</th>
+                        <th>Elemento</th>
+                        <th>Pavimento</th>
+                        <th>Papel</th>
+                        <th>Colaboradores</th>
+                        <th>Status</th>
+                        <th class="text-center">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($pranchas as $prancha): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($prancha['id'] ?? '') ?></td>
+                        <td><?= htmlspecialchars($prancha['codigo'] ?? '') ?></td>
+                        <td><?= htmlspecialchars($prancha['cliente_nome'] ?? '') ?></td>
+                        <td><?= htmlspecialchars($prancha['obra_nome'] ?? '') ?></td>
+                        <td><?= htmlspecialchars($prancha['tipo_projeto_sigla'] ?? '') ?></td>
+                        <td><?= htmlspecialchars($prancha['elemento_sigla'] ?? '') ?></td>
+                        <td><?= htmlspecialchars($prancha['pavimento_sigla'] ?? '') ?></td>
+                        <td><?= htmlspecialchars($prancha['tipo_papel_sigla'] ?? '') ?></td>
+                        <td>
+                            <strong>Projetista:</strong> <?= htmlspecialchars($prancha['projetista_nome'] ?? '-') ?><br>
+                            <strong>Verificador:</strong> <?= htmlspecialchars($prancha['verificador_nome'] ?? '-') ?><br>
+                            <strong>Calculista:</strong> <?= htmlspecialchars($prancha['calculista_nome'] ?? '-') ?>
+                        </td>
+                        <td>
+                            <span class="badge
+                                <?= $prancha['status'] == 'ativo' ? 'bg-success' : (
+                                    $prancha['status'] == 'pendente' ? 'bg-warning text-dark' : 'bg-secondary'
+                                ) ?>">
+                                <?= ucfirst($prancha['status'] ?? '') ?>
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <a href="<?= BASE_URL ?>pranchas/editar/<?= $prancha['id'] ?>" class="btn btn-sm btn-warning">Editar</a>
+                            <a href="<?= BASE_URL ?>pranchas/excluir/<?= $prancha['id'] ?>" class="btn btn-sm btn-danger"
+                               onclick="return confirm('Confirma excluir esta prancha?')">Excluir</a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+<?php include_once __DIR__ . '/../../layouts/footer.php'; ?>
